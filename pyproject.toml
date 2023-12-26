@@ -1,0 +1,12 @@
+[tool.poetry]
+name = "scrap"
+version = "0.1.0-a0"  # sync with src/scrap/version.py
+description = "Web testing wrapper"
+authors = ["Michael Makukha <m.makukha@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "~3.11.7"  # sync with .python-version and Dockerfile
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
