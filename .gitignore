@@ -1,7 +1,4 @@
-/dist/
-.idea/
-.mypy_cache/
+dist/
 __pycache__/
-.secrets/
-.task/
-/.venv/
+.python-version
+.venv/
