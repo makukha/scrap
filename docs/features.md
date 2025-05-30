@@ -1,0 +1,1 @@
+- _Structured vector_ data structure
