@@ -1,6 +1,6 @@
-from doctest import ELLIPSIS
-import subprocess
 import sys
+from doctest import ELLIPSIS
+from subprocess import check_call
 from unittest import TestCase
 
 from doctestcase import doctestcase
@@ -16,8 +16,9 @@ class UsageProjectEntrypoint(TestCase):
     # myproject/myproject.py
     import scrap
 
+
     class MyProject(scrap.Project):
-        ...
+        pass
     ```
     ```toml
     # myproject/pyproject.toml
@@ -38,14 +39,10 @@ class UsageProjectEntrypoint(TestCase):
     """
 
     pkg_path = 'tests/usage/myproject'
-    pkg_name = 'myproject'
+    pkg = 'myproject'
 
     def setUp(self) -> None:
-        subprocess.check_call(
-            [sys.executable, '-m', 'pip', 'install', self.pkg_path]
-        )
+        check_call([sys.executable, '-m', 'pip', 'install', self.pkg_path])
 
     def tearDown(self) -> None:
-        subprocess.check_call(
-            [sys.executable, '-m', 'pip', 'uninstall', '-y', self.pkg_name]
-        )
+        check_call([sys.executable, '-m', 'pip', 'uninstall', '-y', self.pkg])

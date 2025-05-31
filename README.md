@@ -57,8 +57,9 @@ When project package declares entry point `scrap.project`,
 # myproject/myproject.py
 import scrap
 
+
 class MyProject(scrap.Project):
-    ...
+    pass
 ```
 ```toml
 # myproject/pyproject.toml
