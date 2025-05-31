@@ -1,0 +1,7 @@
+[project]
+name = "myproject"
+version = "0.1.0"
+description = ""
+
+[project.entry-points."scrap.project"]
+myproject = "myproject:MyProject"
