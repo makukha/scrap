@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, ParamSpec, TypeVar
 from zoneinfo import ZoneInfo
 
 from lxml.etree import ElementBase as ElementBase
-from lxml.etree import _Element as Element
 from lxml.etree import tostring
 from lxml.html import HtmlElement as HtmlElement
 from lxml.html import fromstring
@@ -43,12 +42,6 @@ class StVector[T]:
     @property
     def is_scalar(self) -> bool:
         return self.depth == 0
-
-    @classmethod
-    def from_html(cls, content, base_url=None):  # type: (str | bytes, str | yarl.URL | None) -> StVector[HtmlElement]
-        base_url = base_url if base_url is None else str(base_url)
-        data = fromstring(content, base_url=base_url)  # type: ignore[arg-type]  # until lxml/lxml-stubs#107 is released
-        return cls(data)  # type: ignore[arg-type]
 
     def copy(self) -> Self:
         return self.__class__(copy_upto_level(self.data, self.depth), depth=self.depth)
@@ -144,25 +137,6 @@ class StVector[T]:
         ret = self.level(up=1).apply(
             lambda x: any(x) if isinstance(x, Iterable) else bool(x)
         )
-        return ret
-
-    def attr(self, name):  # type: (str) -> StVector[str | None]
-        def _attr(item: ElementBase) -> str | None:
-            if not isinstance(item, ElementBase):
-                raise TypeError(f'Required ElementBase instead of {type(item)}')
-            return item.get(name)
-
-        ret = self.apply(_attr)  # type: ignore[arg-type]
-        return ret
-
-    def css(self, expr):  # type: (str) -> StVector[Element]
-        def _css(item: ElementBase) -> list[Element]:
-            if not isinstance(item, ElementBase):
-                raise TypeError(f'Required ElementBase instead of {type(item)}')
-            return item.cssselect(expr)
-
-        ret = self.apply(_css)  # type: ignore[arg-type]
-        ret.depth += 1
         return ret
 
     def date(self, fmt):  # type: (str) -> StVector[date | None]
@@ -290,17 +264,48 @@ class StVector[T]:
         ret = self.apply(_text)
         return ret
 
-    def xpath(self, expr):  # type: (str) -> StVector[ElementBase] | StVector[bool] | StVector[builtins.float] | StVector[str]
-        def _xpath(
-            item: ElementBase,
-        ) -> list[ElementBase] | list[bool] | list[float] | list[str]:
-            if not isinstance(item, ElementBase):
-                raise TypeError(f'Required ElementBase instead of {type(item)}')
-            return item.xpath(expr)  # type: ignore[return-value]
 
-        ret = self.apply(_xpath)  # type: ignore[arg-type,misc]
+class HtmlVector[T](StVector[T]):
+    """
+    Structured vector on top of lxml.html Element.
+    """
+
+    @classmethod
+    def from_string(cls, content, base_url=None):  # type: (str | bytes, str | yarl.URL | None) -> HtmlVector[HtmlElement]
+        base_url = base_url if base_url is None else str(base_url)
+        data = fromstring(content, base_url=base_url)  # type: ignore[arg-type]  # until lxml/lxml-stubs#107 is released
+        return cls(data)  # type: ignore[arg-type]
+
+    def attr(self, name):  # type: (str) -> HtmlVector[str | None]
+        def _attr(item: HtmlElement) -> str | None:
+            if not isinstance(item, HtmlElement):
+                raise TypeError(f'Required HtmlElement instead of {type(item)}')
+            return item.get(name)  # type: ignore[no-any-return]
+
+        ret = self.apply(_attr)
+        return ret  # type: ignore[return-value]
+
+    def css(self, expr):  # type: (str) -> HtmlVector[HtmlElement]
+        def _css(item: HtmlElement) -> list[HtmlElement]:
+            if not isinstance(item, HtmlElement):
+                raise TypeError(f'Required HtmlElement instead of {type(item)}')
+            return item.cssselect(expr)  # type: ignore[no-any-return]
+
+        ret = self.apply(_css)
         ret.depth += 1
-        return ret
+        return ret  # type: ignore[return-value]
+
+    def xpath(self, expr):  # type: (str) -> HtmlVector[HtmlElement] | HtmlVector[bool] | HtmlVector[builtins.float] | HtmlVector[str]
+        def _xpath(
+            item: HtmlElement,
+        ) -> list[HtmlElement] | list[bool] | list[float] | list[str]:
+            if not isinstance(item, HtmlElement):
+                raise TypeError(f'Required HtmlElement instead of {type(item)}')
+            return item.xpath(expr)  # type: ignore[no-any-return]
+
+        ret = self.apply(_xpath)  # type: ignore[misc]
+        ret.depth += 1
+        return ret  # type: ignore[return-value]
 
 
 # helpers
