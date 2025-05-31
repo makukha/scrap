@@ -41,7 +41,7 @@ $ pip install scrap
 <!-- docsub: include docs/usage.md -->
 <!-- docsub: begin -->
 <!-- docsub: x toc tests/test_usage.py 'Usage.*' -->
-* [First use case](#first-use-case)
+* [Export project with package entrypoint](#export-project-with-package-entrypoint)
 <!-- docsub: end -->
 
 ```pycon
@@ -50,10 +50,34 @@ $ pip install scrap
 
 <!-- docsub: begin -->
 <!-- docsub: x cases tests/test_usage.py 'Usage.*' -->
-## First use case
+## Export project with package entrypoint
+
+When project package declares entry point `scrap.project`,
+```python
+# myproject/myproject.py
+import scrap
+
+
+class MyProject(scrap.Project):
+    pass
+```
+```toml
+# myproject/pyproject.toml
+[project]
+name = "myproject"
+version = "0.1.0"
+description = ""
+
+[project.entry-points."scrap.project"]
+myproject = "myproject:MyProject"
+```
+
+it becomes registered as `scrap` project:
 
 ```pycon
->>> from scrap import __version__
+>>> import scrap
+>>> scrap.get_projects()
+(('myproject', <class 'myproject.MyProject'>),)
 ```
 
 <!-- docsub: end -->
