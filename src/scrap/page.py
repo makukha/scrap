@@ -34,15 +34,17 @@ class PageProtocol(Protocol):
 
 
 @runtime_checkable
-class LocatorProtocol(Protocol):
+class BrowserProtocol(Protocol):
     """
-    Base locator protocol.
+    Base browser protocol.
     """
 
-    page: PageProtocol
+    page: PageProtocol | None
+    pages: list[PageProtocol]
 
-    async def click(self) -> None: ...
-    async def scroll_into_view(self) -> None: ...
+    async def open_page(self) -> PageProtocol: ...
+    async def close_page(self, page: int | PageProtocol) -> None: ...
+    def page_index(self, page: PageProtocol) -> int | None: ...
 
 
 @dataclass
@@ -52,6 +54,18 @@ class BasePageModel:
     """
 
     page: PageProtocol
+
+
+@runtime_checkable
+class LocatorProtocol(Protocol):
+    """
+    Base locator protocol.
+    """
+
+    page: PageProtocol
+
+    async def click(self) -> None: ...
+    async def scroll_into_view(self) -> None: ...
 
 
 class BasePageElement(ABC):
